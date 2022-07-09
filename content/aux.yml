@@ -1,0 +1,5 @@
+title: Die wunderbare Welt von Isotopp
+sort_field: url
+sort_direction: asc
+index_route: /aux
+entry_route: /{slug}

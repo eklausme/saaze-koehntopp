@@ -1,0 +1,28 @@
+#!/bin/bash
+# Deploy Kristian Koehntopp's blog
+# Elmar Klausmeier, 02-Jul-2022
+
+KLMHOME=/home/klm
+SAAZEROOT=$KLMHOME/php/saaze-koehntopp
+DOCROOT=/srv/http/koehntopp
+CDIRS="koehntopp"
+
+errorExit() {
+	echo $1
+	exit 1
+}
+
+[ -d $DOCROOT ] && rm -rf $DOCROOT
+[ -d /tmp/build ] || errorExit "No build directory in /tmp"
+mv /tmp/build $DOCROOT
+
+cat	\
+	<(echo "<?php \$title='Search'; \$url='/koehntopp/search.php'; \$rbase='/koehntopp'; \$cdirs='$CDIRS'; ?>")	\
+	$SAAZEROOT/templates/top-layout.php	\
+	$SAAZEROOT/content/aux/search.php	\
+	$SAAZEROOT/templates/bottom-layout.php	\
+	| tee $SAAZEROOT/public/search.php > $DOCROOT/search.php
+
+cd $DOCROOT
+bloghtmlrss `find . -maxdepth 1 -name 202\* -printf "%P/index.html\n" | sort -r | head -40` > $DOCROOT/feed.xml
+

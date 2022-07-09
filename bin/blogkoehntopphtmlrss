@@ -1,0 +1,88 @@
+#!/bin/perl -W
+# Create RSS XML file ("feed") from Saaze generated HTML files
+#
+# Input: List of HTML files (order of files determines order of <item>))
+# Output: RSS
+#
+# Example:
+#      blogkoehntopphtmlrss `find . -maxdepth 1 -name 202\* -printf "%P/index.html\n" | sort -r | head -40`
+#
+# Elmar Klausmeier, 27-Jul-2021: Initial version for eklausmeier.goip.de
+# Elmar Klausmeier, 06-Jul-2022: Adaption for Koehntopp site
+
+use strict;
+use POSIX qw(strftime);
+use POSIX qw(mktime);
+
+my $dt = strftime("%a, %d %b %Y %H:%M:%S GMT",gmtime());	# RFC-822 format: Wed, 02 Oct 2002 13:00:00 GMT
+print <<"EOT";
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+	<title>Die wunderbare Welt von Isotopp</title>
+	<description>Kristian Koehntopp</description>
+	<lastBuildDate>$dt</lastBuildDate>
+	<link>https://eklausmeier.goip.de/koehntopp</link>
+	<atom:link href="https://eklausmeier.goip.de/koehntopp/feed.xml" rel="self" type="application/rss+xml" />
+	<generator>blogkoehntopphtmlrss</generator>
+
+EOT
+
+my %monthNr = (	# Convert full month name to month-number minus one
+	"January" => 0, "February" => 1, "March" => 2, "April" => 3,
+	"May" => 4, "June" => 5, "July" => 6, "August" => 7,
+	"September" => 8, "October" => 9, "November" => 10, "December" => 11
+);
+
+sub item(@) {
+	my $f = $_[0];
+	return if ($f =~ /\/\d{4}\/index\.html$/);	# ignore .../2021/index.html etc.
+	open(F,"< $f") || die("Cannot open $f");
+
+	my $link = $f;
+	$link =~ s/index\.html$//;
+	print "\t<item>\n"
+	. "\t\t<link>https://eklausmeier.goip.de/koehntopp/$link</link>\n"
+	. "\t\t<guid>https://eklausmeier.goip.de/koehntopp/$link</guid>\n";
+
+	my ($dt,$year,$month,$day,$hour,$minute,$sec);
+	my ($title,$linecnt,$articleText,$txtcnt) = (0,0,0,0);
+	while (<F>) {
+		chomp;
+		if (/^\s+<title>(.+?)<\/title>$/) {
+			printf("\t\t<title>%s</title>\n",$1);
+			$title = 1;
+		} elsif (/^\s+<div class="d\-block d\-lg\-inline">(\d+)..\s+(\w+)\s+(\d\d\d\d)<\/div>/) {
+			($year,$month,$day,$hour,$minute,$sec) = ($3,$monthNr{$2},$1,12,0,0);
+			# RFC-822 format: Wed, 02 Oct 2002 13:00:00 GMT
+			$dt = strftime("%a, %d %b %Y %H:%M:%S GMT",$sec,$minute,$hour,$day,$month,$year-1900);
+			printf("\t\t<pubDate>%s</pubDate>\n",$dt);
+		} elsif ($title && $articleText == 0) {
+			$articleText = 1 if (/^\s+<\/header>/);	# now skip 3 lines
+		} elsif ($articleText && ++$txtcnt > 3) {
+			if ($linecnt++ == 0) {
+				print "\t\t<description><![CDATA[\n";
+			}
+			last if (/^<\/div><\/div>$/);
+			s/<a href="\.\.\/\.\.\/\.\.\//<a href="https:\/\/eklausmeier\.goip\.de\/koehntopp\//g;
+			s/<a href="\.\.\/\.\.\/2/<a href="https:\/\/eklausmeier\.goip\.de\/koehntopp\/2/g;
+			#s/<img src="\.\.\/\.\.\/\.\.\/img\//<img src="https:\/\/eklausmeier\.goip\.de\/img\//g;
+			print $_ . "\n";
+		}
+	}
+	print << "EOT";
+		]]></description>
+	</item>
+EOT
+
+	close(F) || die("Cannot close $f");
+}
+
+
+while (<@ARGV>) {
+	item($_);
+}
+
+
+print "</channel>\n</rss>\n";
+

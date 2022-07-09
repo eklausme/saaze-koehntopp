@@ -1,0 +1,42 @@
+#!/bin/perl -W
+# Convert Kris Koehntopp markdown files to Simplified Saaze
+#
+# 1. Manually rename 2019-04-25-what-has-kubernetes-ever-done=for-us.md to file without =
+# after this script.
+# 2. Remove 2004-02-08-cooties.md file, it is entirely empty
+#
+# Elmar Klausmeier, 03-Jun-2022
+
+use strict;
+
+while (<>) {
+	chomp;
+
+	# Data cleansing
+	s/\s+$//;	# rtrim
+	s/:smile:/&#x1F600;/g;
+	s/\xe2\x99\xa3\-\-\-/---/;	# in 2018-12-19-whatabotism.md
+	s/feature\-§img:/feature-img:/;	# in 2021-12-20-dein-kind-will-minecraft-spielen.md
+	s/^tags: \[\]/tags: ["review"]/;	# in 2017-02-28-fertig-gelesen-coaching-beratung-und-gehirn.md
+	s/" title="input_validation\.php\.txt" target="_blank//;	# 2007-03-30-parameterdeklarationen-fur-webseiten.md
+	s/\-L 8080:10\.11\.12\.13:80 \-l <user> io\.example\.com/`-L 8080:10.11.12.13:80 -l <user> io.example.com`/;	# 2003-11-01-mobile-devices.md
+	s/netwworking/networking/;	# 2019-01-24-social-networks-and-usenet.md
+
+	s/feature\-img: assets\/img\/background\//feature-img: /;	# No hardcoded paths
+
+	# Link to original images
+	#s/\!\[\]\(\/uploads/\!\[\]\(https:\/\/blog.koehntopp.info\/uploads/g;
+	s/\]\(\/uploads/\]\(https:\/\/blog.koehntopp.info\/uploads/g;
+
+	# Hugo links to ordinary Markdown links
+	# Example: [Software Defined Silicon]({{< ref "/content/posts/2021-09-30-software-defined-silicon.md" >}})
+	s/\]\(\{\{<\s*ref "\/content\/posts/\]\(../g;
+	s/\.md" >\}\}\)/\)/g;
+	# Alternate form in 2011-08-10-ivw-jetzt-datenschutzkonform-updated.md:
+	# [IVW Zählpixel]({* link _posts/2011-08-10-ivw-jetzt-datenschutzkonform-updated.md %})
+	s/\]\(\{\* link _posts/\]\(../g;
+	s/\.md %\}\)/\)/g;
+
+	print $_ . "\n";
+}
+

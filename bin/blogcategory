@@ -1,0 +1,84 @@
+#!/bin/perl -W
+# Read frontmatter of Markdown file and write categories and tags to single JSON file
+# Call like this in content directory:
+#     blogcategory `find blog -name \*.md` > cat_and_tag.json
+#
+# Elmar Klausmeier, 22-Mar-2022: listSplit(), readMkd()
+# Elmar Klausmeier, 01-Apr-2022: date, @ARGV, references in listSplit()
+# Elmar Klausmeier, 02-Apr-2022: write JSON
+# Elmar Klausmeier, 03-Apr-2022: JSON now in sub prtInnerJSON for both cat's & tags
+# Elmar Klausmeier, 31-May-2022: categories or tags list can now be on separate lines
+# Elmar Klausmeier, 06-Jul-2022: getopts() and p-flag for URL prefix for eklausmeier+koehntopp
+
+
+use strict;
+use Getopt::Std;
+my %opts = ();
+getopts('p:',\%opts);
+my $prefix = (defined($opts{'p'}) ? $opts{'p'} : "../../");
+
+my (%cat, %tag);	# each is hash of array of strings
+
+
+sub listSplit(@) {
+	my $s = $_[0];
+	$s =~ s/^\s*\[\s*"//;	# strip ["
+	$s =~ s/"\s*\]//;	# strip "]
+	return split(/",\s*"/,$s);
+}
+
+
+sub readMkd(@) {	# read Markdown file and put categories and tags in hashes
+	my $fname = $_[0];
+	#printf("fname=%s\n",$fname);
+	open(F,"<$fname") || die("Cannot open $fname");
+	my ($threedash,$draft,$title,$date,$catTag,@catArr,@tagArr) = (0,0,"","",0,(),());
+	my $refArr;
+	while (<F>) {
+		chomp;
+		s/\s+$//;	# rtrim
+		if (/^\-\-\-\s*$/) { $catTag = 0; last if (++$threedash >= 2); }
+		elsif (/^title:/) { $catTag = 0; $title = substr($_,6); $title =~ s/^\s*"//; $title =~ s/"$//; $title =~ s/([^\\])"/$1\\"/g; }
+		elsif (/^date:/) { $catTag = 0; $date = substr($_,5); $date =~ s/^\s*"//; $date = substr($date,0,10); }
+		elsif (/^draft:\s*true/) { $catTag = 0; $draft = 1; last; }
+		elsif (/^categories:/) { $catTag = 1; $refArr = \@catArr; push @catArr, listSplit(substr($_,11)); }
+		elsif (/^tags:/) { $catTag = 1; $refArr = \@tagArr; push @tagArr, listSplit(substr($_,5)); }
+		elsif ($catTag == 1 && /^- /) { push @$refArr, listSplit(substr($_,2)); }
+		else { $catTag = 0; }
+	}
+	close(F) || die("Cannot close $fname");
+	return if ($draft == 1);
+	$fname =~ s/\.md$//;
+	my $url = "<a href=\\\"".$prefix.$fname."\\\">$date: $title</a>";
+	foreach (@catArr) { push $cat{$_}->@*, $url; }
+	foreach (@tagArr) { push $tag{$_}->@*, $url; }
+}
+
+
+sub prtInnerJSON(@) {
+	my $href = $_[0];	# hash reference
+	my $n = keys %{$href};	# for comma at end of list
+	foreach my $key (sort keys %{$href}) {
+		print "\t\t\"$key\": [\n";
+		my $m = scalar @{%{$href}{$key}};	# for comma at end of list
+		foreach (sort @{%{$href}{$key}}) {
+			printf("\t\t\t\"%s\"%s\n", $_, --$m ? "," : "");
+		}
+		printf("\t\t]%s\n", --$n ? "," : "");
+	}
+}
+
+
+while (<@ARGV>) {
+	readMkd($_);
+}
+
+# Write the two hashes in JSON format
+print "{\n\t\"categories\": {\n";
+prtInnerJSON(\%cat);
+print "\t},\n\t\"tags\": {\n";
+prtInnerJSON(\%tag);
+print "\t}\n}\n";
+
+
+
