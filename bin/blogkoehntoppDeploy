@@ -24,5 +24,5 @@ cat	\
 	| tee $SAAZEROOT/public/search.php > $DOCROOT/search.php
 
 cd $DOCROOT
-bloghtmlrss `find . -maxdepth 1 -name 202\* -printf "%P/index.html\n" | sort -r | head -40` > $DOCROOT/feed.xml
+blogkoehntopphtmlrss `find . -maxdepth 1 -name 202\* -printf "%P/index.html\n" | sort -r | head -40` > $DOCROOT/feed.xml
 
