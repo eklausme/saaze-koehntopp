@@ -38,7 +38,13 @@
 			</div>
 			</div>
 		</div>
-		<p><br><br>Generated <?= date('d-M-y H:i') ?> GMT using <a href="https://eklausmeier.goip.de/blog/2021/10-31-simplified-saaze">Simplified Saaze</a>, served by <a href="https://hiawatha-webserver.org">Hiawatha</a><br><br></p>
+		<p><br><br><?php
+			printf("Generated %s GMT using <a href=\"https://eklausmeier.goip.de/blog/2021/10-31-simplified-saaze\">Simplified Saaze</a>%s%s",
+				date('d-M-y H:i'),
+				getenv('NON_NGINX') ? '' : ', Web-Server <a href="https://nginx.org">NGINX</a>',
+				isset($_SERVER['REQUEST_TIME_FLOAT']) ? sprintf(", rendered in %.2f ms",1000 * (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'])) : ''
+			);
+		?><br><br></p>
 	</footer>
 
 	<script src="https://blog.koehntopp.info/js/bootstrap.js"></script>
@@ -61,9 +67,9 @@
 	<script src="/jscss/prism.js"></script>
 <?php } ?>
 <?php if (true || isset($entry['prismjs-old'])) { ?>
-	<script src="https://unpkg.com/prismjs@v1.28.0/components/prism-core.min.js"></script>
-	<script src="https://unpkg.com/prismjs@v1.28.0/plugins/autoloader/prism-autoloader.min.js"></script>
-	<script src="https://unpkg.com/prismjs@v1.28.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+	<script src="https://unpkg.com/prismjs@v1.29.0/components/prism-core.min.js"></script>
+	<script src="https://unpkg.com/prismjs@v1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+	<script src="https://unpkg.com/prismjs@v1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <?php } ?>
 <?php } ?>
 
