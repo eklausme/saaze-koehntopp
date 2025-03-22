@@ -36,6 +36,15 @@
 <?php } ?>
 <link rel="stylesheet" href="/jscss/koehntopp.css">
 
+
+<link href="/koehntopp/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/koehntopp/pagefind/pagefind-ui.js"></script>
+<script>
+	window.addEventListener('DOMContentLoaded', (event) => {
+		new PagefindUI({ element: "#search", showSubResults: true });
+	});
+</script>
+
 </head>
 
 <body class="line-numbers vsc-initialized">
@@ -55,7 +64,10 @@
 			<ul class="navbar-nav ms-auto">
 			<li class="nav-item "><a class="nav-link" href="<?=$rbase?>/about/"><span class="">About</span></a></li>
 			<li class="nav-item "><a class="nav-link" href="<?=$rbase?>/contribute/"><span class="">Contribute</span></a></li>
+			<li class="nav-item "><div id="search"></div></li>
+<?php if (false) { ?>
 			<li class="nav-item "><a class="nav-link" href="<?=$rbase?>/search.php"><span class=""><svg class="bi" height="1.5rem" width="1.5rem" fill="currentColor"><use xlink:href="/assets/img/bootstrap-icons.svg#search"></use></svg></span></a></li>
+<?php } ?>
 			<li class="nav-item "><a class="nav-link" href="<?=$rbase?>/tags/"><span class=""><svg class="bi" width="1.5rem" height="1.5rem" fill="currentColor"><use xlink:href="/assets/img/bootstrap-icons.svg#tags-fill"></use></svg></span></a></li>
 			</ul>
 		</div>
