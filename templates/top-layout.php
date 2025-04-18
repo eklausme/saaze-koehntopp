@@ -31,8 +31,8 @@
 	<link href=/jscss/prism.css rel=stylesheet>
 <?php } ?>
 <?php if (true || isset($entry['prismjs-old'])) { ?>
-	<link href="https://unpkg.com/prismjs@v1.28.0/themes/prism.css" rel="stylesheet" />
-	<link href="https://unpkg.com/prismjs@v1.28.0/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+	<link href="https://unpkg.com/prismjs@latest/themes/prism.css" rel="stylesheet" />
+	<link href="https://unpkg.com/prismjs@latest/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
 <?php } ?>
 <link rel="stylesheet" href="/jscss/koehntopp.css">
 

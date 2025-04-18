@@ -67,9 +67,9 @@
 	<script src="/jscss/prism.js"></script>
 <?php } ?>
 <?php if (true || isset($entry['prismjs-old'])) { ?>
-	<script src="https://unpkg.com/prismjs@v1.29.0/components/prism-core.min.js"></script>
-	<script src="https://unpkg.com/prismjs@v1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-	<script src="https://unpkg.com/prismjs@v1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+	<script src="https://unpkg.com/prismjs@latest/components/prism-core.min.js"></script>
+	<script src="https://unpkg.com/prismjs@latest/plugins/autoloader/prism-autoloader.min.js"></script>
+	<script src="https://unpkg.com/prismjs@latest/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <?php } ?>
 <?php } ?>
 
